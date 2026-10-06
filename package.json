@@ -1,0 +1,50 @@
+{
+  "name": "xamarin-maui-check",
+  "version": "1.0.0",
+  "description": "Xamarin to .NET MAUI migration check: reads the solutions, old-style and SDK-style projects, packages.config, C# and XAML files of a Xamarin.Forms, Xamarin.Android or Xamarin.iOS solution as text, builds nothing, and lists what must change to move it to .NET MAUI: projects to convert to SDK-style, platform heads that become Platforms folders, Xamarin target frameworks, Xamarin-era packages and what replaces them, packages with no known equivalent, custom renderers, effects, DependencyService, MessagingCenter, the Device class, Xamarin.Forms namespaces in C# and XAML and layouts .NET MAUI does not carry over, with file and line, a summary and an effort score per area. Text, JSON, CSV and GitHub annotation output, exit codes for a pipeline, no dependencies.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "bin": {
+    "xamarin-maui-check": "bin/xamarin-maui-check.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "docs",
+    "examples",
+    "research",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "test:coverage": "node --test --experimental-test-coverage \"test/*.test.js\"",
+    "check": "node tools/check.mjs",
+    "example": "node tools/example.mjs"
+  },
+  "keywords": [
+    "xamarin",
+    "xamarin-forms",
+    "dotnet-maui",
+    "maui",
+    "migration",
+    "mobile-app",
+    "csproj",
+    "xaml",
+    "code-review",
+    "cli"
+  ],
+  "author": "INNERLUXES <info@innerluxes.dev>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/INNERLUXES/xamarin-maui-check.git"
+  },
+  "homepage": "https://innerluxes.dev/application/mobile/development/xamarin"
+}
