@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:TidewaterDriver.Controls"
+             xmlns:effects="clr-namespace:TidewaterDriver.Effects"
+             x:Class="TidewaterDriver.Views.DeliveryPage"
+             Title="Today's drops">
+    <!-- The header is pinned with a RelativeLayout; the list fills the rest. -->
+    <RelativeLayout>
+        <Label x:Name="RouteLabel"
+               Text="{Binding RouteName}"
+               FontSize="20"
+               RelativeLayout.XConstraint="{ConstraintExpression Type=Constant, Constant=16}"
+               RelativeLayout.YConstraint="{ConstraintExpression Type=Constant, Constant=12}" />
+        <controls:RoundedEntry Placeholder="Parcel code"
+                               Text="{Binding ParcelCode}"
+                               RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=RouteLabel, Property=Height, Factor=1, Constant=24}"
+                               RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=1}">
+            <controls:RoundedEntry.Effects>
+                <effects:ShadowEffect />
+            </controls:RoundedEntry.Effects>
+        </controls:RoundedEntry>
+        <StackLayout RelativeLayout.YConstraint="{ConstraintExpression Type=Constant, Constant=120}">
+            <ListView ItemsSource="{Binding Stops}" HasUnevenRows="True" />
+            <Button Text="Mark delivered" Command="{Binding DeliverCommand}" HorizontalOptions="FillAndExpand" />
+        </StackLayout>
+    </RelativeLayout>
+</ContentPage>

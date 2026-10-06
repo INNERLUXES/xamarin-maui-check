@@ -1,0 +1,63 @@
+{
+  "name": "built-in defaults",
+  "rules": {
+    "noMauiEquivalent": "error",
+    "nonSdkProject": "warning",
+    "replacePackage": "warning",
+    "unknownXamarinPackage": "warning",
+    "customRenderer": "warning",
+    "effect": "warning",
+    "removedLayout": "warning",
+    "platformHead": "info",
+    "legacyTargetFramework": "info",
+    "platformManifest": "info",
+    "formsNamespace": "info",
+    "dependencyService": "info",
+    "messagingCenter": "info",
+    "deviceApi": "info",
+    "graphicsType": "info"
+  },
+  "packageMap": [
+    {
+      "match": "Xamarin.Forms",
+      "use": "Microsoft.Maui.Controls, which an SDK-style project with UseMaui brings in"
+    },
+    {
+      "match": "Xamarin.Essentials",
+      "use": "the APIs built into .NET MAUI; remove the package and its using directives"
+    },
+    {
+      "match": "Xamarin.CommunityToolkit",
+      "use": "CommunityToolkit.Maui, the .NET MAUI Community Toolkit"
+    },
+    {
+      "match": "Xamarin.CommunityToolkit.Markup",
+      "use": "CommunityToolkit.Maui.Markup"
+    },
+    {
+      "match": "Xamarin.Forms.Maps",
+      "use": "Microsoft.Maui.Controls.Maps"
+    },
+    {
+      "match": "Xamarin.Forms.DualScreen",
+      "use": "Microsoft.Maui.Controls.Foldable"
+    },
+    {
+      "match": "SkiaSharp.Views.Forms",
+      "use": "SkiaSharp.Views.Maui.Controls"
+    }
+  ],
+  "keepPackages": [
+    "Xamarin.AndroidX.*",
+    "Xamarin.Google.*"
+  ],
+  "layouts": [
+    {
+      "name": "RelativeLayout",
+      "use": "Grid; RelativeLayout is only a compatibility control in .NET MAUI"
+    }
+  ],
+  "exclude": [],
+  "minSeverity": "info",
+  "failOn": "error"
+}

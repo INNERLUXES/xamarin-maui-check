@@ -1,0 +1,15 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrightwellNotes", "BrightwellNotes\BrightwellNotes.csproj", "{6E9C4A21-5B8D-4C73-9E2F-1A7D3B6C8E45}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrightwellNotes.Android", "BrightwellNotes.Android\BrightwellNotes.Android.csproj", "{A4F72B39-8C1E-4D56-B3A9-7E2C5F8D1B67}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+EndGlobal

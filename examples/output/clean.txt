@@ -1,0 +1,114 @@
+xamarin-maui-check: examples/clean
+input: 1 solution; 2 project files; 0 packages.config; 3 C# files; 2 XAML files; 1 platform manifest; 1 other file passed over; 0 folders named bin, obj, packages, .git or .vs passed over; 0 paths excluded; 0 links not followed
+config: built-in defaults: package table 7 entries; keep Xamarin.AndroidX.* and Xamarin.Google.*; layouts RelativeLayout; exclude none; minimum severity info; fail on error
+rules: no-maui-equivalent (error); non-sdk-project (warning); replace-package (warning); unknown-xamarin-package (warning); custom-renderer (warning); effect (warning); removed-layout (warning); platform-head (info); legacy-target-framework (info); platform-manifest (info); forms-namespace (info); dependency-service (info); messaging-center (info); device-api (info); graphics-type (info); unreadable-file (error); scan-limit (error)
+findings: 12 (4 warning, 8 info)
+
+Projects (2)
+
+  project                                                                style      kind                   targets            packages  error  warning  info
+  examples/clean/BrightwellNotes.Android/BrightwellNotes.Android.csproj  old-style  Android head           MonoAndroid v13.0  2         0      2        4
+  examples/clean/BrightwellNotes/BrightwellNotes.csproj                  SDK-style  Xamarin.Forms library  netstandard2.0     2         0      2        4
+
+Packages (3)
+
+  package                     versions    projects  status   use
+  Xamarin.AndroidX.AppCompat  1.6.1.6     1         keep     -
+  Xamarin.Essentials          1.8.1       1         replace  the APIs built into .NET MAUI; remove the package and its using directives
+  Xamarin.Forms               5.0.0.2622  2         replace  Microsoft.Maui.Controls, which an SDK-style project with UseMaui brings in
+
+Summary
+
+  projects: 2 (1 old-style, 1 SDK-style), 1 platform head (1 Android), in 1 solution listing 2 projects
+  packages: 3 in 4 references: 2 to replace, 0 with no .NET MAUI equivalent, 0 to check, 1 kept
+  custom renderers: 0; effects: 0 platform effects and 0 routing effects
+  C# files: 3, 3 naming Xamarin.Forms or Xamarin.Essentials (4 references)
+  XAML files: 2, 2 in the Xamarin.Forms XAML namespace
+  DependencyService: 0; MessagingCenter: 0; Device class: 0
+
+Effort score (relative weights of docs/method.md, not a time estimate)
+
+  area        findings  score
+  project     4         7
+  packages    3         3
+  renderers   0         0
+  effects     0         0
+  apis        0         0
+  namespaces  5         5
+  layouts     0         0
+  total       12        15
+
+Rules (17)
+
+  rule                     level    findings
+  no-maui-equivalent       error    0
+  non-sdk-project          warning  1
+  replace-package          warning  3
+  unknown-xamarin-package  warning  0
+  custom-renderer          warning  0
+  effect                   warning  0
+  removed-layout           warning  0
+  platform-head            info     1
+  legacy-target-framework  info     1
+  platform-manifest        info     1
+  forms-namespace          info     5
+  dependency-service       info     0
+  messaging-center         info     0
+  device-api               info     0
+  graphics-type            info     0
+  unreadable-file          error    0
+  scan-limit               error    0
+
+Findings (12)
+
+  WARNING  non-sdk-project          examples/clean/BrightwellNotes.Android/BrightwellNotes.Android.csproj:2
+           the project BrightwellNotes.Android is in the old project format, with no Sdk on its Project element: it lists every file and reference by hand and must become an SDK-style project to target .NET
+           fix: convert the project to an SDK-style project, by hand or with the .NET Upgrade Assistant, with UseMaui set to true and .NET target frameworks; move what AssemblyInfo.cs and the old properties held into the project file
+
+  WARNING  replace-package          examples/clean/BrightwellNotes.Android/BrightwellNotes.Android.csproj:19
+           the package Xamarin.Forms 5.0.0.2622 is a Xamarin-era package: on .NET MAUI use Microsoft.Maui.Controls, which an SDK-style project with UseMaui brings in
+           fix: remove the package and add the one the message names, then update the namespaces and the code that used it
+
+  WARNING  replace-package          examples/clean/BrightwellNotes/BrightwellNotes.csproj:8
+           the package Xamarin.Forms 5.0.0.2622 is a Xamarin-era package: on .NET MAUI use Microsoft.Maui.Controls, which an SDK-style project with UseMaui brings in
+           fix: remove the package and add the one the message names, then update the namespaces and the code that used it
+
+  WARNING  replace-package          examples/clean/BrightwellNotes/BrightwellNotes.csproj:9
+           the package Xamarin.Essentials 1.8.1 is a Xamarin-era package: on .NET MAUI use the APIs built into .NET MAUI; remove the package and its using directives
+           fix: remove the package and add the one the message names, then update the namespaces and the code that used it
+
+  INFO     platform-head            examples/clean/BrightwellNotes.Android/BrightwellNotes.Android.csproj:2
+           the project BrightwellNotes.Android is the Android head of the solution: in a .NET MAUI single project its code and resources go to Platforms/Android, or it becomes an SDK-style .NET for Android project
+           fix: move the platform code and resources into the Platforms folder of a .NET MAUI single project (Platforms/Android, Platforms/iOS, Platforms/Windows), or convert the head to an SDK-style .NET for Android, .NET for iOS or WinUI project
+
+  INFO     legacy-target-framework  examples/clean/BrightwellNotes.Android/BrightwellNotes.Android.csproj:12
+           the project targets MonoAndroid v13.0, a Xamarin framework: on .NET the target is net8.0-android, or the same name for the .NET version you move to
+           fix: target .NET instead: net8.0-android for Android, net8.0-ios for iOS, net8.0-maccatalyst for the Mac and net8.0-windows10.0.19041.0 for Windows (or the same names for the .NET version you move to), with the minimum OS version in SupportedOSPlatformVersion
+
+  INFO     forms-namespace          examples/clean/BrightwellNotes.Android/MainActivity.cs:7
+           the file names the Xamarin.Forms or Xamarin.Essentials namespace 2 times (0 in using directives)
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+
+  INFO     platform-manifest        examples/clean/BrightwellNotes.Android/Properties/AndroidManifest.xml:1
+           an Android manifest of a head project: in a .NET MAUI single project it lives in Platforms/Android, and the minimum Android version moves to SupportedOSPlatformVersion
+           fix: in a single project, keep it under Platforms/Android or Platforms/iOS; take the app title, id and version from the project file, and move the minimum Android version from uses-sdk to SupportedOSPlatformVersion
+
+  INFO     forms-namespace          examples/clean/BrightwellNotes/App.xaml:2
+           the XAML declares the Xamarin.Forms XAML namespace: .NET MAUI XAML uses the .NET MAUI namespace
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+
+  INFO     forms-namespace          examples/clean/BrightwellNotes/App.xaml.cs:1
+           the file names the Xamarin.Forms or Xamarin.Essentials namespace 1 time (1 in using directives)
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+
+  INFO     forms-namespace          examples/clean/BrightwellNotes/NotesPage.xaml:2
+           the XAML declares the Xamarin.Forms XAML namespace: .NET MAUI XAML uses the .NET MAUI namespace
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+
+  INFO     forms-namespace          examples/clean/BrightwellNotes/NotesPage.xaml.cs:3
+           the file names the Xamarin.Forms or Xamarin.Essentials namespace 1 time (1 in using directives)
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+
+This check reads the solution, project, package, C# and XAML files on disk as text and builds nothing; the code and XAML checks are a heuristic. A finding is a lead with a file and a line, the effort score is a relative weight and not a time estimate, and a clean result is not a build and not a finished migration (docs/limits.md).
+
+RESULT: PASS - no finding at or above error (4 warning, 8 info)

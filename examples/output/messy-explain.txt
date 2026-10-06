@@ -1,0 +1,434 @@
+xamarin-maui-check: examples/messy
+input: 1 solution; 3 project files; 1 packages.config; 13 C# files; 3 XAML files; 2 platform manifests; 1 other file passed over; 2 folders named bin, obj, packages, .git or .vs passed over; 1 path excluded; 0 links not followed
+config: examples/config.json (Tidewater migration inventory): package table 8 entries (1 from the configuration); keep Xamarin.AndroidX.* and Xamarin.Google.*; layouts RelativeLayout; exclude Samples/**; minimum severity info; fail on error
+rules: no-maui-equivalent (error); non-sdk-project (warning); replace-package (warning); unknown-xamarin-package (warning); custom-renderer (warning); effect (warning); removed-layout (warning); platform-head (info); legacy-target-framework (info); platform-manifest (info); forms-namespace (info); dependency-service (info); messaging-center (info); device-api (info); graphics-type (info); unreadable-file (error); scan-limit (error)
+findings: 44 (1 error, 14 warning, 29 info)
+
+Projects (3)
+
+  project                                                                style      kind                   targets            packages  error  warning  info
+  examples/messy/TidewaterDriver.Android/TidewaterDriver.Android.csproj  old-style  Android head           MonoAndroid v13.0  3         0      5        8
+  examples/messy/TidewaterDriver.iOS/TidewaterDriver.iOS.csproj          old-style  iOS head               Xamarin.iOS        2         0      4        5
+  examples/messy/TidewaterDriver/TidewaterDriver.csproj                  SDK-style  Xamarin.Forms library  netstandard2.0     6         1      5        16
+
+Packages (7)
+
+  package                      versions    projects  status         use
+  Fernway.Forms.Charts         3.4.1       1         no equivalent  none known
+  Saltmarsh.Geo                2.1.0       1         other          -
+  Xamarin.AndroidX.Core        1.12.0.2    1         keep           -
+  Xamarin.CommunityToolkit     2.0.6       1         replace        CommunityToolkit.Maui, the .NET MAUI Community Toolkit
+  Xamarin.Essentials           1.8.1       3         replace        the APIs built into .NET MAUI; remove the package and its using directives
+  Xamarin.Forms                5.0.0.2622  3         replace        Microsoft.Maui.Controls, which an SDK-style project with UseMaui brings in
+  Xamarin.Plugins.RouteSketch  1.3.0       1         check          -
+
+Summary
+
+  projects: 3 (2 old-style, 1 SDK-style), 2 platform heads (1 Android, 1 iOS), in 1 solution listing 3 projects
+  packages: 7 in 11 references: 3 to replace, 1 with no .NET MAUI equivalent, 1 to check, 1 kept
+  custom renderers: 2; effects: 1 platform effect and 1 routing effect
+  C# files: 13, 12 naming Xamarin.Forms or Xamarin.Essentials (21 references)
+  XAML files: 3, 3 in the Xamarin.Forms XAML namespace
+  DependencyService: 2; MessagingCenter: 2; Device class: 2
+
+Effort score (relative weights of docs/method.md, not a time estimate)
+
+  area        findings  score
+  project     8         14
+  packages    9         18
+  renderers   2         10
+  effects     1         3
+  apis        8         8
+  namespaces  15        15
+  layouts     1         3
+  total       44        71
+
+Rules (17)
+
+  rule                     level    findings
+  no-maui-equivalent       error    1
+  non-sdk-project          warning  2
+  replace-package          warning  7
+  unknown-xamarin-package  warning  1
+  custom-renderer          warning  2
+  effect                   warning  1
+  removed-layout           warning  1
+  platform-head            info     2
+  legacy-target-framework  info     2
+  platform-manifest        info     2
+  forms-namespace          info     15
+  dependency-service       info     2
+  messaging-center         info     2
+  device-api               info     2
+  graphics-type            info     2
+  unreadable-file          error    0
+  scan-limit               error    0
+
+Findings (44)
+
+  ERROR    no-maui-equivalent       examples/messy/TidewaterDriver/TidewaterDriver.csproj:12
+           the package Fernway.Forms.Charts 3.4.1 has no known .NET MAUI equivalent: the vendor stopped at Xamarin.Forms; pick a .NET MAUI chart library or draw the charts with Microsoft.Maui.Graphics
+           fix: find a library that targets .NET for Android, .NET for iOS or .NET MAUI and does the same job, rebuild the package for .NET target frameworks if you own its code, or write the feature against the platform APIs
+           rule: a package matching Fernway.Forms.Charts
+           basis: Xamarin.Forms NuGet packages are generally not compatible with .NET unless rebuilt for .NET target frameworks; without a compatible version, a package is rebuilt, taken in a preview or replaced (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: support for the Xamarin SDKs, Xamarin.Forms included, has ended with no further fixes or updates, and the policy points Xamarin.Forms apps to .NET MAUI and Xamarin.Android and Xamarin.iOS apps to .NET for Android and .NET for iOS (Xamarin Support Policy (.NET website), https://dotnet.microsoft.com/platform/support/policy/xamarin)
+           the tool's own choice: a package reference of a project or packages.config whose id matches an entry of packageMap with "use": null; the table names such packages only when the configuration does, because whether a library has a .NET version is a fact the tool cannot look up; an error, because the app cannot build on .NET MAUI until the package is replaced or rebuilt
+
+  WARNING  effect                   examples/messy/TidewaterDriver.Android/Effects/AndroidShadowEffect.cs:10
+           the class AndroidShadowEffect is a PlatformEffect, exported by ExportEffect at examples/messy/TidewaterDriver.Android/Effects/AndroidShadowEffect.cs:6: on .NET MAUI the effect is registered with ConfigureEffects, with no ExportEffect or ResolutionGroupName attribute
+           fix: remove the ExportEffect and ResolutionGroupName attributes, put the platform effects next to their RoutingEffect with conditional compilation, and register the pair with ConfigureEffects in MauiProgram; or move the customization to a handler
+           rule: a PlatformEffect class, or an ExportEffect attribute
+           basis: Xamarin.Forms effects can be reused once the ExportEffect and ResolutionGroupName attributes are removed, the platform effects sit with the routing effect, and the effect is registered with ConfigureEffects (Reuse effects in .NET MAUI (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/effects)
+           the tool's own choice: a C# class that derives from PlatformEffect, and an ExportEffect assembly attribute that names an effect no scanned class declares; the RoutingEffect classes are counted in the summary
+
+  WARNING  custom-renderer          examples/messy/TidewaterDriver.Android/Renderers/RoundedEntryRenderer.cs:12
+           the class RoundedEntryRenderer derives from EntryRenderer, a Xamarin.Forms renderer, registered for RoundedEntry by ExportRenderer at examples/messy/TidewaterDriver.Android/Renderers/RoundedEntryRenderer.cs:8: renderers become handlers on .NET MAUI
+           fix: move the customization to a .NET MAUI handler: a PropertyMapper entry, or a handler of its own registered with ConfigureMauiHandlers; a renderer that derives from VisualElementRenderer, ListViewRenderer, FrameRenderer or TableViewRenderer can be kept for a while through the shims, registered with AddHandler, with its ExportRenderer attribute removed
+           rule: a class that derives from a *Renderer type, or an ExportRenderer attribute
+           basis: .NET MAUI replaces custom renderers with handlers, which map each property to its own method, create no parent view and are registered in MauiProgram rather than found by assembly scanning (Migrate a custom renderer to a .NET MAUI handler (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/renderer-to-handler)
+           basis: renderers that derive from a few base classes, such as VisualElementRenderer, ListViewRenderer or FrameRenderer, can be reused through shims once the ExportRenderer attributes are removed and the renderers are registered with AddHandler (Reuse custom renderers in .NET MAUI (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/custom-renderers)
+           the tool's own choice: a C# class whose first base type has a name that ends with Renderer, such as EntryRenderer or ViewRenderer<T, TNative>, and an ExportRenderer assembly attribute that names a renderer no scanned class declares; each renderer is one finding, with the place of its ExportRenderer attribute when there is one
+
+  WARNING  non-sdk-project          examples/messy/TidewaterDriver.Android/TidewaterDriver.Android.csproj:2
+           the project TidewaterDriver.Android is in the old project format, with no Sdk on its Project element: it lists every file and reference by hand and must become an SDK-style project to target .NET
+           fix: convert the project to an SDK-style project, by hand or with the .NET Upgrade Assistant, with UseMaui set to true and .NET target frameworks; move what AssemblyInfo.cs and the old properties held into the project file
+           rule: a .csproj that is not SDK-style
+           basis: every project must become an SDK-style project to run on .NET, while a multi-project solution does not have to become a single project (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           basis: the Upgrade Assistant converts the projects to SDK-style, sets UseMaui, removes the Xamarin.Forms and Xamarin.Essentials packages, replaces Xamarin.CommunityToolkit with the .NET MAUI Community Toolkit and swaps the SkiaSharp packages (Upgrade a Xamarin.Forms app to a .NET MAUI app with the .NET Upgrade Assistant (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/upgrade-assistant)
+           the tool's own choice: a .csproj whose Project element has no Sdk attribute, no Sdk element and no Import with an Sdk; such a project lists every file and reference by hand and must be converted before it can target .NET
+
+  WARNING  replace-package          examples/messy/TidewaterDriver.Android/TidewaterDriver.Android.csproj:23
+           the package Xamarin.Forms 5.0.0.2622 is a Xamarin-era package: on .NET MAUI use Microsoft.Maui.Controls, which an SDK-style project with UseMaui brings in
+           fix: remove the package and add the one the message names, then update the namespaces and the code that used it
+           rule: a package matching Xamarin.Forms, Xamarin.Essentials, Xamarin.CommunityToolkit, Xamarin.CommunityToolkit.Markup and 3 more
+           basis: the Upgrade Assistant converts the projects to SDK-style, sets UseMaui, removes the Xamarin.Forms and Xamarin.Essentials packages, replaces Xamarin.CommunityToolkit with the .NET MAUI Community Toolkit and swaps the SkiaSharp packages (Upgrade a Xamarin.Forms app to a .NET MAUI app with the .NET Upgrade Assistant (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/upgrade-assistant)
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET MAUI Community Toolkit ships as NuGet packages for .NET MAUI projects, CommunityToolkit.Maui and CommunityToolkit.Maui.Markup (.NET MAUI Community Toolkit documentation (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/)
+           basis: the Xamarin.Forms SkiaSharp packages are removed and SkiaSharp.Views.Maui.Controls is added, and the types of SkiaSharp.Views.Forms move to the SkiaSharp.Views.Maui namespaces (Reuse SkiaSharp code in .NET MAUI (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/skiasharp)
+           the tool's own choice: a package reference whose id matches an entry of packageMap that names what to use; the default table is short and each entry follows a public page; the configuration can add entries in front of it
+
+  WARNING  replace-package          examples/messy/TidewaterDriver.Android/TidewaterDriver.Android.csproj:24
+           the package Xamarin.Essentials 1.8.1 is a Xamarin-era package: on .NET MAUI use the APIs built into .NET MAUI; remove the package and its using directives
+           fix: remove the package and add the one the message names, then update the namespaces and the code that used it
+           rule: a package matching Xamarin.Forms, Xamarin.Essentials, Xamarin.CommunityToolkit, Xamarin.CommunityToolkit.Markup and 3 more
+           basis: the Upgrade Assistant converts the projects to SDK-style, sets UseMaui, removes the Xamarin.Forms and Xamarin.Essentials packages, replaces Xamarin.CommunityToolkit with the .NET MAUI Community Toolkit and swaps the SkiaSharp packages (Upgrade a Xamarin.Forms app to a .NET MAUI app with the .NET Upgrade Assistant (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/upgrade-assistant)
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET MAUI Community Toolkit ships as NuGet packages for .NET MAUI projects, CommunityToolkit.Maui and CommunityToolkit.Maui.Markup (.NET MAUI Community Toolkit documentation (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/)
+           basis: the Xamarin.Forms SkiaSharp packages are removed and SkiaSharp.Views.Maui.Controls is added, and the types of SkiaSharp.Views.Forms move to the SkiaSharp.Views.Maui namespaces (Reuse SkiaSharp code in .NET MAUI (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/skiasharp)
+           the tool's own choice: a package reference whose id matches an entry of packageMap that names what to use; the default table is short and each entry follows a public page; the configuration can add entries in front of it
+
+  WARNING  custom-renderer          examples/messy/TidewaterDriver.iOS/Renderers/RoundedEntryRenderer.cs:11
+           the class RoundedEntryRenderer derives from EntryRenderer, a Xamarin.Forms renderer, registered for RoundedEntry by ExportRenderer at examples/messy/TidewaterDriver.iOS/Renderers/RoundedEntryRenderer.cs:7: renderers become handlers on .NET MAUI
+           fix: move the customization to a .NET MAUI handler: a PropertyMapper entry, or a handler of its own registered with ConfigureMauiHandlers; a renderer that derives from VisualElementRenderer, ListViewRenderer, FrameRenderer or TableViewRenderer can be kept for a while through the shims, registered with AddHandler, with its ExportRenderer attribute removed
+           rule: a class that derives from a *Renderer type, or an ExportRenderer attribute
+           basis: .NET MAUI replaces custom renderers with handlers, which map each property to its own method, create no parent view and are registered in MauiProgram rather than found by assembly scanning (Migrate a custom renderer to a .NET MAUI handler (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/renderer-to-handler)
+           basis: renderers that derive from a few base classes, such as VisualElementRenderer, ListViewRenderer or FrameRenderer, can be reused through shims once the ExportRenderer attributes are removed and the renderers are registered with AddHandler (Reuse custom renderers in .NET MAUI (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/custom-renderers)
+           the tool's own choice: a C# class whose first base type has a name that ends with Renderer, such as EntryRenderer or ViewRenderer<T, TNative>, and an ExportRenderer assembly attribute that names a renderer no scanned class declares; each renderer is one finding, with the place of its ExportRenderer attribute when there is one
+
+  WARNING  non-sdk-project          examples/messy/TidewaterDriver.iOS/TidewaterDriver.iOS.csproj:2
+           the project TidewaterDriver.iOS is in the old project format, with no Sdk on its Project element: it lists every file and reference by hand and must become an SDK-style project to target .NET
+           fix: convert the project to an SDK-style project, by hand or with the .NET Upgrade Assistant, with UseMaui set to true and .NET target frameworks; move what AssemblyInfo.cs and the old properties held into the project file
+           rule: a .csproj that is not SDK-style
+           basis: every project must become an SDK-style project to run on .NET, while a multi-project solution does not have to become a single project (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           basis: the Upgrade Assistant converts the projects to SDK-style, sets UseMaui, removes the Xamarin.Forms and Xamarin.Essentials packages, replaces Xamarin.CommunityToolkit with the .NET MAUI Community Toolkit and swaps the SkiaSharp packages (Upgrade a Xamarin.Forms app to a .NET MAUI app with the .NET Upgrade Assistant (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/upgrade-assistant)
+           the tool's own choice: a .csproj whose Project element has no Sdk attribute, no Sdk element and no Import with an Sdk; such a project lists every file and reference by hand and must be converted before it can target .NET
+
+  WARNING  replace-package          examples/messy/TidewaterDriver.iOS/packages.config:3
+           the package Xamarin.Forms 5.0.0.2622 is a Xamarin-era package: on .NET MAUI use Microsoft.Maui.Controls, which an SDK-style project with UseMaui brings in
+           fix: remove the package and add the one the message names, then update the namespaces and the code that used it
+           rule: a package matching Xamarin.Forms, Xamarin.Essentials, Xamarin.CommunityToolkit, Xamarin.CommunityToolkit.Markup and 3 more
+           basis: the Upgrade Assistant converts the projects to SDK-style, sets UseMaui, removes the Xamarin.Forms and Xamarin.Essentials packages, replaces Xamarin.CommunityToolkit with the .NET MAUI Community Toolkit and swaps the SkiaSharp packages (Upgrade a Xamarin.Forms app to a .NET MAUI app with the .NET Upgrade Assistant (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/upgrade-assistant)
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET MAUI Community Toolkit ships as NuGet packages for .NET MAUI projects, CommunityToolkit.Maui and CommunityToolkit.Maui.Markup (.NET MAUI Community Toolkit documentation (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/)
+           basis: the Xamarin.Forms SkiaSharp packages are removed and SkiaSharp.Views.Maui.Controls is added, and the types of SkiaSharp.Views.Forms move to the SkiaSharp.Views.Maui namespaces (Reuse SkiaSharp code in .NET MAUI (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/skiasharp)
+           the tool's own choice: a package reference whose id matches an entry of packageMap that names what to use; the default table is short and each entry follows a public page; the configuration can add entries in front of it
+
+  WARNING  replace-package          examples/messy/TidewaterDriver.iOS/packages.config:4
+           the package Xamarin.Essentials 1.8.1 is a Xamarin-era package: on .NET MAUI use the APIs built into .NET MAUI; remove the package and its using directives
+           fix: remove the package and add the one the message names, then update the namespaces and the code that used it
+           rule: a package matching Xamarin.Forms, Xamarin.Essentials, Xamarin.CommunityToolkit, Xamarin.CommunityToolkit.Markup and 3 more
+           basis: the Upgrade Assistant converts the projects to SDK-style, sets UseMaui, removes the Xamarin.Forms and Xamarin.Essentials packages, replaces Xamarin.CommunityToolkit with the .NET MAUI Community Toolkit and swaps the SkiaSharp packages (Upgrade a Xamarin.Forms app to a .NET MAUI app with the .NET Upgrade Assistant (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/upgrade-assistant)
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET MAUI Community Toolkit ships as NuGet packages for .NET MAUI projects, CommunityToolkit.Maui and CommunityToolkit.Maui.Markup (.NET MAUI Community Toolkit documentation (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/)
+           basis: the Xamarin.Forms SkiaSharp packages are removed and SkiaSharp.Views.Maui.Controls is added, and the types of SkiaSharp.Views.Forms move to the SkiaSharp.Views.Maui namespaces (Reuse SkiaSharp code in .NET MAUI (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/skiasharp)
+           the tool's own choice: a package reference whose id matches an entry of packageMap that names what to use; the default table is short and each entry follows a public page; the configuration can add entries in front of it
+
+  WARNING  replace-package          examples/messy/TidewaterDriver/TidewaterDriver.csproj:9
+           the package Xamarin.Forms 5.0.0.2622 is a Xamarin-era package: on .NET MAUI use Microsoft.Maui.Controls, which an SDK-style project with UseMaui brings in
+           fix: remove the package and add the one the message names, then update the namespaces and the code that used it
+           rule: a package matching Xamarin.Forms, Xamarin.Essentials, Xamarin.CommunityToolkit, Xamarin.CommunityToolkit.Markup and 3 more
+           basis: the Upgrade Assistant converts the projects to SDK-style, sets UseMaui, removes the Xamarin.Forms and Xamarin.Essentials packages, replaces Xamarin.CommunityToolkit with the .NET MAUI Community Toolkit and swaps the SkiaSharp packages (Upgrade a Xamarin.Forms app to a .NET MAUI app with the .NET Upgrade Assistant (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/upgrade-assistant)
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET MAUI Community Toolkit ships as NuGet packages for .NET MAUI projects, CommunityToolkit.Maui and CommunityToolkit.Maui.Markup (.NET MAUI Community Toolkit documentation (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/)
+           basis: the Xamarin.Forms SkiaSharp packages are removed and SkiaSharp.Views.Maui.Controls is added, and the types of SkiaSharp.Views.Forms move to the SkiaSharp.Views.Maui namespaces (Reuse SkiaSharp code in .NET MAUI (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/skiasharp)
+           the tool's own choice: a package reference whose id matches an entry of packageMap that names what to use; the default table is short and each entry follows a public page; the configuration can add entries in front of it
+
+  WARNING  replace-package          examples/messy/TidewaterDriver/TidewaterDriver.csproj:10
+           the package Xamarin.Essentials 1.8.1 is a Xamarin-era package: on .NET MAUI use the APIs built into .NET MAUI; remove the package and its using directives
+           fix: remove the package and add the one the message names, then update the namespaces and the code that used it
+           rule: a package matching Xamarin.Forms, Xamarin.Essentials, Xamarin.CommunityToolkit, Xamarin.CommunityToolkit.Markup and 3 more
+           basis: the Upgrade Assistant converts the projects to SDK-style, sets UseMaui, removes the Xamarin.Forms and Xamarin.Essentials packages, replaces Xamarin.CommunityToolkit with the .NET MAUI Community Toolkit and swaps the SkiaSharp packages (Upgrade a Xamarin.Forms app to a .NET MAUI app with the .NET Upgrade Assistant (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/upgrade-assistant)
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET MAUI Community Toolkit ships as NuGet packages for .NET MAUI projects, CommunityToolkit.Maui and CommunityToolkit.Maui.Markup (.NET MAUI Community Toolkit documentation (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/)
+           basis: the Xamarin.Forms SkiaSharp packages are removed and SkiaSharp.Views.Maui.Controls is added, and the types of SkiaSharp.Views.Forms move to the SkiaSharp.Views.Maui namespaces (Reuse SkiaSharp code in .NET MAUI (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/skiasharp)
+           the tool's own choice: a package reference whose id matches an entry of packageMap that names what to use; the default table is short and each entry follows a public page; the configuration can add entries in front of it
+
+  WARNING  replace-package          examples/messy/TidewaterDriver/TidewaterDriver.csproj:11
+           the package Xamarin.CommunityToolkit 2.0.6 is a Xamarin-era package: on .NET MAUI use CommunityToolkit.Maui, the .NET MAUI Community Toolkit
+           fix: remove the package and add the one the message names, then update the namespaces and the code that used it
+           rule: a package matching Xamarin.Forms, Xamarin.Essentials, Xamarin.CommunityToolkit, Xamarin.CommunityToolkit.Markup and 3 more
+           basis: the Upgrade Assistant converts the projects to SDK-style, sets UseMaui, removes the Xamarin.Forms and Xamarin.Essentials packages, replaces Xamarin.CommunityToolkit with the .NET MAUI Community Toolkit and swaps the SkiaSharp packages (Upgrade a Xamarin.Forms app to a .NET MAUI app with the .NET Upgrade Assistant (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/upgrade-assistant)
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET MAUI Community Toolkit ships as NuGet packages for .NET MAUI projects, CommunityToolkit.Maui and CommunityToolkit.Maui.Markup (.NET MAUI Community Toolkit documentation (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/)
+           basis: the Xamarin.Forms SkiaSharp packages are removed and SkiaSharp.Views.Maui.Controls is added, and the types of SkiaSharp.Views.Forms move to the SkiaSharp.Views.Maui namespaces (Reuse SkiaSharp code in .NET MAUI (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/skiasharp)
+           the tool's own choice: a package reference whose id matches an entry of packageMap that names what to use; the default table is short and each entry follows a public page; the configuration can add entries in front of it
+
+  WARNING  unknown-xamarin-package  examples/messy/TidewaterDriver/TidewaterDriver.csproj:13
+           the package Xamarin.Plugins.RouteSketch 1.3.0 was built for Xamarin and is not in the package table: check for a version that targets .NET for Android, .NET for iOS or .NET MAUI
+           fix: check for a version of the package that targets .NET for Android, .NET for iOS or .NET MAUI; once checked, add it to packageMap with what to use, or to keepPackages when it stays
+           rule: a package named Xamarin.* or *.Forms.* outside packageMap and outside Xamarin.AndroidX.* and Xamarin.Google.*
+           basis: Xamarin.Forms NuGet packages are generally not compatible with .NET unless rebuilt for .NET target frameworks; without a compatible version, a package is rebuilt, taken in a preview or replaced (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: Android apps can still use NuGet packages that target monoandroid, and .NET Standard libraries with no dependency on a Xamarin-only framework stay compatible (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           the tool's own choice: a package whose id starts with Xamarin. or has Forms as one of its dot-separated parts, that packageMap does not list and keepPackages does not keep; such a package was built for Xamarin and may have no version for .NET, so it is a lead to check, not a verdict
+
+  WARNING  removed-layout           examples/messy/TidewaterDriver/Views/DeliveryPage.xaml:9
+           <RelativeLayout>: on .NET MAUI use Grid; RelativeLayout is only a compatibility control in .NET MAUI
+           fix: rebuild the layout with the one the message names, usually a Grid with row and column definitions; the compatibility control keeps it working while you do
+           rule: a layout named RelativeLayout
+           basis: RelativeLayout needs the compatibility namespace in .NET MAUI and is not advised, with Grid advised instead, and other layouts measure and space their children differently (Layout behavior changes from Xamarin.Forms (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/layouts)
+           the tool's own choice: an element of the Xamarin.Forms XAML namespace, or a C# new expression, whose type name is in the layouts list of the configuration (RelativeLayout by default)
+
+  INFO     forms-namespace          examples/messy/TidewaterDriver.Android/Effects/AndroidShadowEffect.cs:2
+           the file names the Xamarin.Forms or Xamarin.Essentials namespace 2 times (2 in using directives)
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+           rule: a C# file that names Xamarin.Forms or Xamarin.Essentials, or a XAML file in the Xamarin.Forms XAML namespace
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET Upgrade Assistant can upgrade a multi-project Xamarin.Forms app, and in most cases the app needs more work after it has run (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           the tool's own choice: a C# file that names the Xamarin.Forms or Xamarin.Essentials namespace, in a using directive or a qualified name, outside comments and strings, as one finding with the count; and a XAML file that declares the Xamarin.Forms XAML namespace, as one finding at the declaration
+
+  INFO     forms-namespace          examples/messy/TidewaterDriver.Android/MainActivity.cs:8
+           the file names the Xamarin.Forms or Xamarin.Essentials namespace 4 times (0 in using directives)
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+           rule: a C# file that names Xamarin.Forms or Xamarin.Essentials, or a XAML file in the Xamarin.Forms XAML namespace
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET Upgrade Assistant can upgrade a multi-project Xamarin.Forms app, and in most cases the app needs more work after it has run (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           the tool's own choice: a C# file that names the Xamarin.Forms or Xamarin.Essentials namespace, in a using directive or a qualified name, outside comments and strings, as one finding with the count; and a XAML file that declares the Xamarin.Forms XAML namespace, as one finding at the declaration
+
+  INFO     platform-manifest        examples/messy/TidewaterDriver.Android/Properties/AndroidManifest.xml:1
+           an Android manifest of a head project: in a .NET MAUI single project it lives in Platforms/Android, and the minimum Android version moves to SupportedOSPlatformVersion
+           fix: in a single project, keep it under Platforms/Android or Platforms/iOS; take the app title, id and version from the project file, and move the minimum Android version from uses-sdk to SupportedOSPlatformVersion
+           rule: an AndroidManifest.xml or Info.plist file
+           basis: a .NET MAUI single project keeps platform code and resources in a Platforms folder with one child folder per platform, with one app manifest and one cross-platform entry point (Target multiple platforms from .NET MAUI single project (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/single-project)
+           basis: a .NET for Android project is SDK-style with a target such as net8.0-android, and the minimum Android version moves from the uses-sdk element of AndroidManifest.xml to SupportedOSPlatformVersion (Xamarin.Android project migration (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/android-projects)
+           the tool's own choice: a file named AndroidManifest.xml or Info.plist; only its presence is used, the file is not read
+
+  INFO     forms-namespace          examples/messy/TidewaterDriver.Android/Renderers/RoundedEntryRenderer.cs:5
+           the file names the Xamarin.Forms or Xamarin.Essentials namespace 2 times (2 in using directives)
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+           rule: a C# file that names Xamarin.Forms or Xamarin.Essentials, or a XAML file in the Xamarin.Forms XAML namespace
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET Upgrade Assistant can upgrade a multi-project Xamarin.Forms app, and in most cases the app needs more work after it has run (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           the tool's own choice: a C# file that names the Xamarin.Forms or Xamarin.Essentials namespace, in a using directive or a qualified name, outside comments and strings, as one finding with the count; and a XAML file that declares the Xamarin.Forms XAML namespace, as one finding at the declaration
+
+  INFO     dependency-service       examples/messy/TidewaterDriver.Android/Services/AndroidRouteStore.cs:7
+           the Dependency attribute registers AndroidRouteStore with DependencyService: register it on builder.Services in MauiProgram instead
+           fix: register the platform service on builder.Services in MauiProgram and take it in a constructor; remove the Dependency attribute
+           rule: a DependencyService call or a Dependency attribute
+           basis: .NET MAUI has dependency injection built in: services are registered on MauiAppBuilder.Services in MauiProgram and passed to constructors (Dependency injection in .NET MAUI (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/dependency-injection)
+           the tool's own choice: a call of DependencyService.Get, Register, RegisterSingleton or Resolve, and a Dependency assembly attribute; DependencyService still exists in .NET MAUI, so it is a note
+
+  INFO     forms-namespace          examples/messy/TidewaterDriver.Android/Services/AndroidRouteStore.cs:7
+           the file names the Xamarin.Forms or Xamarin.Essentials namespace 1 time (0 in using directives)
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+           rule: a C# file that names Xamarin.Forms or Xamarin.Essentials, or a XAML file in the Xamarin.Forms XAML namespace
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET Upgrade Assistant can upgrade a multi-project Xamarin.Forms app, and in most cases the app needs more work after it has run (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           the tool's own choice: a C# file that names the Xamarin.Forms or Xamarin.Essentials namespace, in a using directive or a qualified name, outside comments and strings, as one finding with the count; and a XAML file that declares the Xamarin.Forms XAML namespace, as one finding at the declaration
+
+  INFO     platform-head            examples/messy/TidewaterDriver.Android/TidewaterDriver.Android.csproj:2
+           the project TidewaterDriver.Android is the Android head of the solution: in a .NET MAUI single project its code and resources go to Platforms/Android, or it becomes an SDK-style .NET for Android project
+           fix: move the platform code and resources into the Platforms folder of a .NET MAUI single project (Platforms/Android, Platforms/iOS, Platforms/Windows), or convert the head to an SDK-style .NET for Android, .NET for iOS or WinUI project
+           rule: an Android, iOS or UWP head project
+           basis: a .NET MAUI single project keeps platform code and resources in a Platforms folder with one child folder per platform, with one app manifest and one cross-platform entry point (Target multiple platforms from .NET MAUI single project (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/single-project)
+           basis: every project must become an SDK-style project to run on .NET, while a multi-project solution does not have to become a single project (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           basis: .NET MAUI is the evolution of Xamarin.Forms, with its controls rebuilt for performance and extensibility, and one project can target Android, iOS, macOS and Windows (What is .NET MAUI? (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/what-is-maui)
+           the tool's own choice: a .csproj that is a Xamarin.Android, Xamarin.iOS or UWP project, known by its project type GUID, its target framework or its Android and iOS properties; a note, because a solution may keep one project per platform on .NET MAUI, but a single project folds the heads into Platforms folders
+
+  INFO     legacy-target-framework  examples/messy/TidewaterDriver.Android/TidewaterDriver.Android.csproj:14
+           the project targets MonoAndroid v13.0, a Xamarin framework: on .NET the target is net8.0-android, or the same name for the .NET version you move to
+           fix: target .NET instead: net8.0-android for Android, net8.0-ios for iOS, net8.0-maccatalyst for the Mac and net8.0-windows10.0.19041.0 for Windows (or the same names for the .NET version you move to), with the minimum OS version in SupportedOSPlatformVersion
+           rule: a MonoAndroid, Xamarin.iOS, Xamarin.Mac or UAP target
+           basis: a .NET for Android project is SDK-style with a target such as net8.0-android, and the minimum Android version moves from the uses-sdk element of AndroidManifest.xml to SupportedOSPlatformVersion (Xamarin.Android project migration (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/android-projects)
+           basis: support for the Xamarin SDKs, Xamarin.Forms included, has ended with no further fixes or updates, and the policy points Xamarin.Forms apps to .NET MAUI and Xamarin.Android and Xamarin.iOS apps to .NET for Android and .NET for iOS (Xamarin Support Policy (.NET website), https://dotnet.microsoft.com/platform/support/policy/xamarin)
+           the tool's own choice: a TargetFramework or TargetFrameworks value that starts with monoandroid, xamarinios, xamarin.ios, xamarinmac, xamarintvos, xamarinwatchos or uap, and the TargetFrameworkVersion, TargetFrameworkIdentifier or TargetPlatformVersion of an old-style Android, iOS or UWP head
+
+  INFO     forms-namespace          examples/messy/TidewaterDriver.iOS/AppDelegate.cs:7
+           the file names the Xamarin.Forms or Xamarin.Essentials namespace 2 times (0 in using directives)
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+           rule: a C# file that names Xamarin.Forms or Xamarin.Essentials, or a XAML file in the Xamarin.Forms XAML namespace
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET Upgrade Assistant can upgrade a multi-project Xamarin.Forms app, and in most cases the app needs more work after it has run (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           the tool's own choice: a C# file that names the Xamarin.Forms or Xamarin.Essentials namespace, in a using directive or a qualified name, outside comments and strings, as one finding with the count; and a XAML file that declares the Xamarin.Forms XAML namespace, as one finding at the declaration
+
+  INFO     platform-manifest        examples/messy/TidewaterDriver.iOS/Info.plist:1
+           an iOS property list of a head project: in a .NET MAUI single project it lives in Platforms/iOS
+           fix: in a single project, keep it under Platforms/Android or Platforms/iOS; take the app title, id and version from the project file, and move the minimum Android version from uses-sdk to SupportedOSPlatformVersion
+           rule: an AndroidManifest.xml or Info.plist file
+           basis: a .NET MAUI single project keeps platform code and resources in a Platforms folder with one child folder per platform, with one app manifest and one cross-platform entry point (Target multiple platforms from .NET MAUI single project (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/single-project)
+           basis: a .NET for Android project is SDK-style with a target such as net8.0-android, and the minimum Android version moves from the uses-sdk element of AndroidManifest.xml to SupportedOSPlatformVersion (Xamarin.Android project migration (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/android-projects)
+           the tool's own choice: a file named AndroidManifest.xml or Info.plist; only its presence is used, the file is not read
+
+  INFO     forms-namespace          examples/messy/TidewaterDriver.iOS/Renderers/RoundedEntryRenderer.cs:4
+           the file names the Xamarin.Forms or Xamarin.Essentials namespace 2 times (2 in using directives)
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+           rule: a C# file that names Xamarin.Forms or Xamarin.Essentials, or a XAML file in the Xamarin.Forms XAML namespace
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET Upgrade Assistant can upgrade a multi-project Xamarin.Forms app, and in most cases the app needs more work after it has run (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           the tool's own choice: a C# file that names the Xamarin.Forms or Xamarin.Essentials namespace, in a using directive or a qualified name, outside comments and strings, as one finding with the count; and a XAML file that declares the Xamarin.Forms XAML namespace, as one finding at the declaration
+
+  INFO     platform-head            examples/messy/TidewaterDriver.iOS/TidewaterDriver.iOS.csproj:2
+           the project TidewaterDriver.iOS is the iOS head of the solution: in a .NET MAUI single project its code and resources go to Platforms/iOS, or it becomes an SDK-style .NET for iOS project
+           fix: move the platform code and resources into the Platforms folder of a .NET MAUI single project (Platforms/Android, Platforms/iOS, Platforms/Windows), or convert the head to an SDK-style .NET for Android, .NET for iOS or WinUI project
+           rule: an Android, iOS or UWP head project
+           basis: a .NET MAUI single project keeps platform code and resources in a Platforms folder with one child folder per platform, with one app manifest and one cross-platform entry point (Target multiple platforms from .NET MAUI single project (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/single-project)
+           basis: every project must become an SDK-style project to run on .NET, while a multi-project solution does not have to become a single project (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           basis: .NET MAUI is the evolution of Xamarin.Forms, with its controls rebuilt for performance and extensibility, and one project can target Android, iOS, macOS and Windows (What is .NET MAUI? (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/what-is-maui)
+           the tool's own choice: a .csproj that is a Xamarin.Android, Xamarin.iOS or UWP project, known by its project type GUID, its target framework or its Android and iOS properties; a note, because a solution may keep one project per platform on .NET MAUI, but a single project folds the heads into Platforms folders
+
+  INFO     legacy-target-framework  examples/messy/TidewaterDriver.iOS/TidewaterDriver.iOS.csproj:7
+           the project targets Xamarin.iOS, a Xamarin framework: on .NET the target is net8.0-ios, or the same name for the .NET version you move to
+           fix: target .NET instead: net8.0-android for Android, net8.0-ios for iOS, net8.0-maccatalyst for the Mac and net8.0-windows10.0.19041.0 for Windows (or the same names for the .NET version you move to), with the minimum OS version in SupportedOSPlatformVersion
+           rule: a MonoAndroid, Xamarin.iOS, Xamarin.Mac or UAP target
+           basis: a .NET for Android project is SDK-style with a target such as net8.0-android, and the minimum Android version moves from the uses-sdk element of AndroidManifest.xml to SupportedOSPlatformVersion (Xamarin.Android project migration (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/android-projects)
+           basis: support for the Xamarin SDKs, Xamarin.Forms included, has ended with no further fixes or updates, and the policy points Xamarin.Forms apps to .NET MAUI and Xamarin.Android and Xamarin.iOS apps to .NET for Android and .NET for iOS (Xamarin Support Policy (.NET website), https://dotnet.microsoft.com/platform/support/policy/xamarin)
+           the tool's own choice: a TargetFramework or TargetFrameworks value that starts with monoandroid, xamarinios, xamarin.ios, xamarinmac, xamarintvos, xamarinwatchos or uap, and the TargetFrameworkVersion, TargetFrameworkIdentifier or TargetPlatformVersion of an old-style Android, iOS or UWP head
+
+  INFO     forms-namespace          examples/messy/TidewaterDriver/App.xaml:2
+           the XAML declares the Xamarin.Forms XAML namespace: .NET MAUI XAML uses the .NET MAUI namespace
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+           rule: a C# file that names Xamarin.Forms or Xamarin.Essentials, or a XAML file in the Xamarin.Forms XAML namespace
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET Upgrade Assistant can upgrade a multi-project Xamarin.Forms app, and in most cases the app needs more work after it has run (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           the tool's own choice: a C# file that names the Xamarin.Forms or Xamarin.Essentials namespace, in a using directive or a qualified name, outside comments and strings, as one finding with the count; and a XAML file that declares the Xamarin.Forms XAML namespace, as one finding at the declaration
+
+  INFO     forms-namespace          examples/messy/TidewaterDriver/App.xaml.cs:2
+           the file names the Xamarin.Forms or Xamarin.Essentials namespace 2 times (2 in using directives)
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+           rule: a C# file that names Xamarin.Forms or Xamarin.Essentials, or a XAML file in the Xamarin.Forms XAML namespace
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET Upgrade Assistant can upgrade a multi-project Xamarin.Forms app, and in most cases the app needs more work after it has run (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           the tool's own choice: a C# file that names the Xamarin.Forms or Xamarin.Essentials namespace, in a using directive or a qualified name, outside comments and strings, as one finding with the count; and a XAML file that declares the Xamarin.Forms XAML namespace, as one finding at the declaration
+
+  INFO     forms-namespace          examples/messy/TidewaterDriver/Controls/RoundedEntry.cs:1
+           the file names the Xamarin.Forms or Xamarin.Essentials namespace 1 time (1 in using directives)
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+           rule: a C# file that names Xamarin.Forms or Xamarin.Essentials, or a XAML file in the Xamarin.Forms XAML namespace
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET Upgrade Assistant can upgrade a multi-project Xamarin.Forms app, and in most cases the app needs more work after it has run (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           the tool's own choice: a C# file that names the Xamarin.Forms or Xamarin.Essentials namespace, in a using directive or a qualified name, outside comments and strings, as one finding with the count; and a XAML file that declares the Xamarin.Forms XAML namespace, as one finding at the declaration
+
+  INFO     graphics-type            examples/messy/TidewaterDriver/Controls/RoundedEntry.cs:12
+           2 uses of Color, Rectangle or Point, first Color.Gray: these types move to Microsoft.Maui.Graphics
+           fix: use Microsoft.Maui.Graphics: Color with float values, Colors for named colors, Color.FromArgb for a hex string, Rect for Rectangle and Point for Point
+           rule: a use of Color, Rectangle or Point in a file that names Xamarin.Forms
+           basis: the Xamarin.Forms Color struct is replaced by the Color and Colors classes of Microsoft.Maui.Graphics, with float values and no implicit conversion to System.Drawing.Color (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the Microsoft.Maui.Graphics namespace holds the Color and Colors classes and the Point, Rect and Size structures (Microsoft.Maui.Graphics Namespace (Microsoft Learn, .NET API browser), https://learn.microsoft.com/en-us/dotnet/api/microsoft.maui.graphics)
+           the tool's own choice: in a C# file that names Xamarin.Forms, a member of Color such as Color.FromHex or Color.Red, and new Rectangle(...) or new Point(...), as one finding per file with the count; the types may come from another namespace, so it is a note
+
+  INFO     forms-namespace          examples/messy/TidewaterDriver/Effects/ShadowEffect.cs:1
+           the file names the Xamarin.Forms or Xamarin.Essentials namespace 1 time (1 in using directives)
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+           rule: a C# file that names Xamarin.Forms or Xamarin.Essentials, or a XAML file in the Xamarin.Forms XAML namespace
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET Upgrade Assistant can upgrade a multi-project Xamarin.Forms app, and in most cases the app needs more work after it has run (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           the tool's own choice: a C# file that names the Xamarin.Forms or Xamarin.Essentials namespace, in a using directive or a qualified name, outside comments and strings, as one finding with the count; and a XAML file that declares the Xamarin.Forms XAML namespace, as one finding at the declaration
+
+  INFO     forms-namespace          examples/messy/TidewaterDriver/ViewModels/DeliveryViewModel.cs:5
+           the file names the Xamarin.Forms or Xamarin.Essentials namespace 2 times (2 in using directives)
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+           rule: a C# file that names Xamarin.Forms or Xamarin.Essentials, or a XAML file in the Xamarin.Forms XAML namespace
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET Upgrade Assistant can upgrade a multi-project Xamarin.Forms app, and in most cases the app needs more work after it has run (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           the tool's own choice: a C# file that names the Xamarin.Forms or Xamarin.Essentials namespace, in a using directive or a qualified name, outside comments and strings, as one finding with the count; and a XAML file that declares the Xamarin.Forms XAML namespace, as one finding at the declaration
+
+  INFO     dependency-service       examples/messy/TidewaterDriver/ViewModels/DeliveryViewModel.cs:12
+           DependencyService.Get looks up a platform service through the service locator of Xamarin.Forms: .NET MAUI has dependency injection built in
+           fix: register the platform service on builder.Services in MauiProgram and take it in a constructor; remove the Dependency attribute
+           rule: a DependencyService call or a Dependency attribute
+           basis: .NET MAUI has dependency injection built in: services are registered on MauiAppBuilder.Services in MauiProgram and passed to constructors (Dependency injection in .NET MAUI (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/dependency-injection)
+           the tool's own choice: a call of DependencyService.Get, Register, RegisterSingleton or Resolve, and a Dependency assembly attribute; DependencyService still exists in .NET MAUI, so it is a note
+
+  INFO     messaging-center         examples/messy/TidewaterDriver/ViewModels/DeliveryViewModel.cs:19
+           MessagingCenter.Send: MessagingCenter is deprecated in .NET MAUI
+           fix: send a typed message with WeakReferenceMessenger of CommunityToolkit.Mvvm and receive it with IRecipient<T>, or use an event
+           rule: a MessagingCenter call
+           basis: MessagingCenter is deprecated, and WeakReferenceMessenger of the CommunityToolkit.Mvvm package, or plain events, are advised instead (Publish and subscribe to messages (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/messagingcenter)
+           the tool's own choice: a call of MessagingCenter.Send, Subscribe or Unsubscribe, or a use of MessagingCenter.Instance
+
+  INFO     device-api               examples/messy/TidewaterDriver/ViewModels/DeliveryViewModel.cs:20
+           Device.BeginInvokeOnMainThread: on .NET MAUI use MainThread.BeginInvokeOnMainThread
+           fix: use the replacement the message names: DeviceInfo.Platform, DeviceInfo.Idiom, MainThread, the Dispatcher or Launcher.OpenAsync
+           rule: a member of the Device class that .NET MAUI replaces
+           basis: the Device class of Xamarin.Forms is replaced by several types: RuntimePlatform and OnPlatform by DeviceInfo.Platform, BeginInvokeOnMainThread by MainThread.BeginInvokeOnMainThread, StartTimer by the dispatcher and OpenUri by Launcher.OpenAsync (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           the tool's own choice: a use of Device.RuntimePlatform, Device.OnPlatform, Device.BeginInvokeOnMainThread, Device.InvokeOnMainThreadAsync, Device.StartTimer, Device.OpenUri, Device.Idiom or Device.OS in C#; the replacement is named in the message
+
+  INFO     device-api               examples/messy/TidewaterDriver/ViewModels/DeliveryViewModel.cs:24
+           Device.RuntimePlatform: on .NET MAUI use DeviceInfo.Platform
+           fix: use the replacement the message names: DeviceInfo.Platform, DeviceInfo.Idiom, MainThread, the Dispatcher or Launcher.OpenAsync
+           rule: a member of the Device class that .NET MAUI replaces
+           basis: the Device class of Xamarin.Forms is replaced by several types: RuntimePlatform and OnPlatform by DeviceInfo.Platform, BeginInvokeOnMainThread by MainThread.BeginInvokeOnMainThread, StartTimer by the dispatcher and OpenUri by Launcher.OpenAsync (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           the tool's own choice: a use of Device.RuntimePlatform, Device.OnPlatform, Device.BeginInvokeOnMainThread, Device.InvokeOnMainThreadAsync, Device.StartTimer, Device.OpenUri, Device.Idiom or Device.OS in C#; the replacement is named in the message
+
+  INFO     forms-namespace          examples/messy/TidewaterDriver/Views/DeliveryPage.xaml:2
+           the XAML declares the Xamarin.Forms XAML namespace: .NET MAUI XAML uses the .NET MAUI namespace
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+           rule: a C# file that names Xamarin.Forms or Xamarin.Essentials, or a XAML file in the Xamarin.Forms XAML namespace
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET Upgrade Assistant can upgrade a multi-project Xamarin.Forms app, and in most cases the app needs more work after it has run (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           the tool's own choice: a C# file that names the Xamarin.Forms or Xamarin.Essentials namespace, in a using directive or a qualified name, outside comments and strings, as one finding with the count; and a XAML file that declares the Xamarin.Forms XAML namespace, as one finding at the declaration
+
+  INFO     forms-namespace          examples/messy/TidewaterDriver/Views/DeliveryPage.xaml.cs:2
+           the file names the Xamarin.Forms or Xamarin.Essentials namespace 1 time (1 in using directives)
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+           rule: a C# file that names Xamarin.Forms or Xamarin.Essentials, or a XAML file in the Xamarin.Forms XAML namespace
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET Upgrade Assistant can upgrade a multi-project Xamarin.Forms app, and in most cases the app needs more work after it has run (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           the tool's own choice: a C# file that names the Xamarin.Forms or Xamarin.Essentials namespace, in a using directive or a qualified name, outside comments and strings, as one finding with the count; and a XAML file that declares the Xamarin.Forms XAML namespace, as one finding at the declaration
+
+  INFO     graphics-type            examples/messy/TidewaterDriver/Views/DeliveryPage.xaml.cs:12
+           1 use of Color, Rectangle or Point, first Color.FromHex: these types move to Microsoft.Maui.Graphics
+           fix: use Microsoft.Maui.Graphics: Color with float values, Colors for named colors, Color.FromArgb for a hex string, Rect for Rectangle and Point for Point
+           rule: a use of Color, Rectangle or Point in a file that names Xamarin.Forms
+           basis: the Xamarin.Forms Color struct is replaced by the Color and Colors classes of Microsoft.Maui.Graphics, with float values and no implicit conversion to System.Drawing.Color (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the Microsoft.Maui.Graphics namespace holds the Color and Colors classes and the Point, Rect and Size structures (Microsoft.Maui.Graphics Namespace (Microsoft Learn, .NET API browser), https://learn.microsoft.com/en-us/dotnet/api/microsoft.maui.graphics)
+           the tool's own choice: in a C# file that names Xamarin.Forms, a member of Color such as Color.FromHex or Color.Red, and new Rectangle(...) or new Point(...), as one finding per file with the count; the types may come from another namespace, so it is a note
+
+  INFO     forms-namespace          examples/messy/TidewaterDriver/Views/SignaturePage.xaml:2
+           the XAML declares the Xamarin.Forms XAML namespace: .NET MAUI XAML uses the .NET MAUI namespace
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+           rule: a C# file that names Xamarin.Forms or Xamarin.Essentials, or a XAML file in the Xamarin.Forms XAML namespace
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET Upgrade Assistant can upgrade a multi-project Xamarin.Forms app, and in most cases the app needs more work after it has run (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           the tool's own choice: a C# file that names the Xamarin.Forms or Xamarin.Essentials namespace, in a using directive or a qualified name, outside comments and strings, as one finding with the count; and a XAML file that declares the Xamarin.Forms XAML namespace, as one finding at the declaration
+
+  INFO     forms-namespace          examples/messy/TidewaterDriver/Views/SignaturePage.xaml.cs:2
+           the file names the Xamarin.Forms or Xamarin.Essentials namespace 1 time (1 in using directives)
+           fix: replace the Xamarin.Forms namespaces with Microsoft.Maui and Microsoft.Maui.Controls, drop the Xamarin.Essentials using directives (.NET MAUI brings them in with global usings), and set the default XAML namespace to the .NET MAUI one
+           rule: a C# file that names Xamarin.Forms or Xamarin.Essentials, or a XAML file in the Xamarin.Forms XAML namespace
+           basis: the Xamarin.Forms namespaces become Microsoft.Maui and Microsoft.Maui.Controls namespaces, the Xamarin.Essentials features are part of .NET MAUI, and the default XAML namespace changes to the .NET MAUI one (Manually upgrade a Xamarin.Forms app to a multi-project .NET MAUI app (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-multi-project)
+           basis: the .NET Upgrade Assistant can upgrade a multi-project Xamarin.Forms app, and in most cases the app needs more work after it has run (Upgrade from Xamarin to .NET (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/migration/)
+           the tool's own choice: a C# file that names the Xamarin.Forms or Xamarin.Essentials namespace, in a using directive or a qualified name, outside comments and strings, as one finding with the count; and a XAML file that declares the Xamarin.Forms XAML namespace, as one finding at the declaration
+
+  INFO     messaging-center         examples/messy/TidewaterDriver/Views/SignaturePage.xaml.cs:15
+           MessagingCenter.Send: MessagingCenter is deprecated in .NET MAUI
+           fix: send a typed message with WeakReferenceMessenger of CommunityToolkit.Mvvm and receive it with IRecipient<T>, or use an event
+           rule: a MessagingCenter call
+           basis: MessagingCenter is deprecated, and WeakReferenceMessenger of the CommunityToolkit.Mvvm package, or plain events, are advised instead (Publish and subscribe to messages (Microsoft Learn), https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/messagingcenter)
+           the tool's own choice: a call of MessagingCenter.Send, Subscribe or Unsubscribe, or a use of MessagingCenter.Instance
+
+note: 1 path matching Samples/** is left out
+note: 2 folders named bin, obj, packages, .git or .vs are passed over
+
+This check reads the solution, project, package, C# and XAML files on disk as text and builds nothing; the code and XAML checks are a heuristic. A finding is a lead with a file and a line, the effort score is a relative weight and not a time estimate, and a clean result is not a build and not a finished migration (docs/limits.md).
+
+RESULT: FAIL - 1 finding at or above error (1 error, 14 warning, 29 info)

@@ -1,0 +1,7 @@
+{
+  "name": "Tidewater migration inventory",
+  "exclude": ["Samples/**"],
+  "packageMap": [
+    { "match": "Fernway.Forms.Charts", "use": null, "note": "the vendor stopped at Xamarin.Forms; pick a .NET MAUI chart library or draw the charts with Microsoft.Maui.Graphics" }
+  ]
+}
